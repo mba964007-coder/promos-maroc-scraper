@@ -1,0 +1,14 @@
+{
+  "name": "promos-maroc-scraper",
+  "version": "1.0.0",
+  "description": "Scraper intelligent de promotions au Maroc — alimenté par Claude API",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "node scraper.js",
+    "test": "node scraper.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "@supabase/supabase-js": "^2.43.0"
+  }
+}
