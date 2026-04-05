@@ -19,395 +19,79 @@
     --blue: #4D8EFF;
     --purple: #9B6DFF;
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.4; }
+  .header { padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(10,10,15,0.92); backdrop-filter: blur(20px); z-index: 100; }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .last-update { font-size: 12px; color: var(--muted); font-weight: 300; }
+  .refresh-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
+  .refresh-btn:hover { background: var(--surface); border-color: rgba(255,255,255,.15); }
+  .stats-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+  .stat { background: var(--bg); padding: 20px 32px; }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; display: block; }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+  .main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
+  .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .filter-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-right: 4px; }
+  .filter-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 7px 16px; border-radius: 100px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; white-space: nowrap; }
+  .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+  .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 500; }
+  .sort-select { margin-left: auto; background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; outline: none; }
+  .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .deal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: all .25s cubic-bezier(.4,0,.2,1); animation: fadeIn .4s ease both; cursor: pointer; display: flex; flex-direction: column; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .deal-card:hover { border-color: rgba(255,255,255,.15); transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,.4); }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  /* Image */
+  .card-image { width: 100%; height: 180px; overflow: hidden; background: var(--surface2); position: relative; flex-shrink: 0; }
+  .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
+  .deal-card:hover .card-image img { transform: scale(1.05); }
+  .card-image-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--muted); }
+  .placeholder-icon { font-size: 36px; opacity: 0.4; }
+  .placeholder-text { font-size: 11px; opacity: 0.4; }
+  .discount-overlay { position: absolute; top: 12px; right: 12px; background: var(--accent); color: white; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
 
-  /* Grain overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.4;
-  }
-
-  /* Header */
-  .header {
-    padding: 28px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: rgba(10,10,15,0.92);
-    backdrop-filter: blur(20px);
-    z-index: 100;
-  }
-
-  .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-    letter-spacing: -0.5px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .logo-dot {
-    width: 10px;
-    height: 10px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .last-update {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  .refresh-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s;
-  }
-  .refresh-btn:hover { background: var(--surface); border-color: rgba(255,255,255,0.15); }
-
-  /* Stats bar */
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .stat {
-    background: var(--bg);
-    padding: 20px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .stat-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-  }
-
-  .stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 300;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-  }
-
-  /* Main layout */
-  .main {
-    padding: 32px 40px;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  /* Filter bar */
-  .filter-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-  }
-
-  .filter-label {
-    font-size: 12px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-right: 4px;
-  }
-
-  .filter-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 7px 16px;
-    border-radius: 100px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-
-  .filter-btn.active {
-    background: var(--text);
-    color: var(--bg);
-    border-color: var(--text);
-    font-weight: 500;
-  }
-
-  .sort-select {
-    margin-left: auto;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 7px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    outline: none;
-  }
-
-  /* Deals grid */
-  .deals-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-  }
-
-  /* Deal card */
-  .deal-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: fadeIn 0.4s ease both;
-    cursor: pointer;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .deal-card:hover {
-    border-color: rgba(255,255,255,0.15);
-    transform: translateY(-3px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  }
-
-  .card-header {
-    padding: 16px 18px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .category-badge {
-    font-size: 11px;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 100px;
-    letter-spacing: 0.3px;
-  }
-
-  .cat-tech { background: rgba(77,142,255,0.15); color: var(--blue); }
-  .cat-maison { background: rgba(155,109,255,0.15); color: var(--purple); }
-  .cat-beaute { background: rgba(255,184,0,0.15); color: var(--accent2); }
-  .cat-sport { background: rgba(0,229,160,0.15); color: var(--accent3); }
-
-  .discount-badge {
-    background: var(--accent);
-    color: white;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 8px;
-    flex-shrink: 0;
-  }
-
-  .card-body {
-    padding: 14px 18px 18px;
-  }
-
-  .deal-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.35;
-    margin-bottom: 6px;
-    color: var(--text);
-  }
-
-  .deal-enseigne {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
-
-  .price-row {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  .price-current {
-    font-family: 'Syne', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .price-old {
-    font-size: 14px;
-    color: var(--muted);
-    text-decoration: line-through;
-  }
-
-  .saving {
-    font-size: 12px;
-    color: var(--accent3);
-    font-weight: 500;
-  }
-
-  /* Score bar */
-  .score-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  .score-track {
-    flex: 1;
-    height: 4px;
-    background: var(--surface2);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .score-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .score-text {
-    font-size: 12px;
-    font-weight: 500;
-    min-width: 32px;
-    text-align: right;
-  }
-
+  .card-header { padding: 14px 16px 0; }
+  .category-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 100px; letter-spacing: .3px; display: inline-block; }
+  .cat-tech { background: rgba(77,142,255,.15); color: var(--blue); }
+  .cat-maison { background: rgba(155,109,255,.15); color: var(--purple); }
+  .cat-beaute { background: rgba(255,184,0,.15); color: var(--accent2); }
+  .cat-sport { background: rgba(0,229,160,.15); color: var(--accent3); }
+  .card-body { padding: 12px 16px 16px; flex: 1; display: flex; flex-direction: column; }
+  .deal-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; line-height: 1.35; margin-bottom: 4px; color: var(--text); }
+  .deal-enseigne { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .price-current { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); }
+  .price-old { font-size: 13px; color: var(--muted); text-decoration: line-through; }
+  .saving { font-size: 11px; color: var(--accent3); font-weight: 500; }
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; margin-top: auto; }
+  .score-track { flex: 1; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .score-fill { height: 100%; border-radius: 2px; }
+  .score-text { font-size: 12px; font-weight: 500; min-width: 32px; text-align: right; }
   .score-high { color: var(--accent3); }
   .score-mid { color: var(--accent2); }
   .score-low { color: var(--muted); }
-
-  .card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .deal-date {
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .view-btn {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text);
-    text-decoration: none;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 8px;
-    transition: all 0.2s;
-    display: inline-block;
-  }
-  .view-btn:hover {
-    background: var(--text);
-    color: var(--bg);
-    border-color: var(--text);
-  }
-
-  /* Empty state */
-  .empty-state {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-    grid-column: 1 / -1;
-  }
-
+  .card-footer { display: flex; justify-content: space-between; align-items: center; }
+  .deal-date { font-size: 11px; color: var(--muted); }
+  .view-btn { font-size: 12px; font-weight: 500; color: var(--text); text-decoration: none; background: var(--surface2); border: 1px solid var(--border); padding: 6px 14px; border-radius: 8px; transition: all .2s; display: inline-block; }
+  .view-btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .empty-state { text-align: center; padding: 80px 20px; color: var(--muted); grid-column: 1/-1; }
   .empty-icon { font-size: 48px; margin-bottom: 16px; }
   .empty-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-
-  /* Loading */
-  .loading {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-    grid-column: 1 / -1;
-  }
-
-  .spinner {
-    width: 32px;
-    height: 32px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .header { padding: 16px 20px; }
-    .stats-bar { grid-template-columns: repeat(2, 1fr); }
-    .main { padding: 20px; }
-    .deals-grid { grid-template-columns: 1fr; }
-  }
+  .loading { text-align: center; padding: 80px 20px; color: var(--muted); grid-column: 1/-1; }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  @media(max-width:768px) { .header{padding:16px 20px} .stats-bar{grid-template-columns:repeat(2,1fr)} .main{padding:20px} .deals-grid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="logo">
-    <div class="logo-dot"></div>
-    Promos Maroc
-  </div>
+  <div class="logo"><div class="logo-dot"></div>Promos Maroc</div>
   <div class="header-right">
     <span class="last-update" id="lastUpdate">Chargement...</span>
     <button class="refresh-btn" onclick="loadDeals()">↻ Actualiser</button>
@@ -415,32 +99,20 @@
 </header>
 
 <div class="stats-bar">
-  <div class="stat">
-    <span class="stat-val" id="statTotal" style="color: var(--accent)">—</span>
-    <span class="stat-label">Deals actifs</span>
-  </div>
-  <div class="stat">
-    <span class="stat-val" id="statAvgScore" style="color: var(--accent2)">—</span>
-    <span class="stat-label">Score moyen</span>
-  </div>
-  <div class="stat">
-    <span class="stat-val" id="statAvgDiscount" style="color: var(--accent3)">—</span>
-    <span class="stat-label">Réduction moy.</span>
-  </div>
-  <div class="stat">
-    <span class="stat-val" id="statTopDeal" style="color: var(--blue); font-size: 18px">—</span>
-    <span class="stat-label">Meilleur deal</span>
-  </div>
+  <div class="stat"><span class="stat-val" id="statTotal" style="color:var(--accent)">—</span><span class="stat-label">Deals actifs</span></div>
+  <div class="stat"><span class="stat-val" id="statAvgScore" style="color:var(--accent2)">—</span><span class="stat-label">Score moyen</span></div>
+  <div class="stat"><span class="stat-val" id="statAvgDiscount" style="color:var(--accent3)">—</span><span class="stat-label">Réduction moy.</span></div>
+  <div class="stat"><span class="stat-val" id="statTopDeal" style="color:var(--blue);font-size:16px">—</span><span class="stat-label">Meilleur deal</span></div>
 </div>
 
 <main class="main">
   <div class="filter-bar">
     <span class="filter-label">Catégorie</span>
-    <button class="filter-btn active" onclick="setFilter('all', this)">Tous</button>
-    <button class="filter-btn" onclick="setFilter('Électronique & Tech', this)">📱 Tech</button>
-    <button class="filter-btn" onclick="setFilter('Maison & Déco', this)">🏠 Maison</button>
-    <button class="filter-btn" onclick="setFilter('Beauté & Santé', this)">✨ Beauté</button>
-    <button class="filter-btn" onclick="setFilter('Sport & Loisirs', this)">⚡ Sport</button>
+    <button class="filter-btn active" onclick="setFilter('all',this)">Tous</button>
+    <button class="filter-btn" onclick="setFilter('Électronique & Tech',this)">📱 Tech</button>
+    <button class="filter-btn" onclick="setFilter('Maison & Déco',this)">🏠 Maison</button>
+    <button class="filter-btn" onclick="setFilter('Beauté & Santé',this)">✨ Beauté</button>
+    <button class="filter-btn" onclick="setFilter('Sport & Loisirs',this)">⚡ Sport</button>
     <select class="sort-select" onchange="setSort(this.value)">
       <option value="scraped_at">Plus récents</option>
       <option value="score">Meilleur score</option>
@@ -448,196 +120,159 @@
       <option value="price_asc">Prix croissant</option>
     </select>
   </div>
-
   <div class="deals-grid" id="dealsGrid">
-    <div class="loading">
-      <div class="spinner"></div>
-      <div>Chargement des deals...</div>
-    </div>
+    <div class="loading"><div class="spinner"></div><div>Chargement des deals...</div></div>
   </div>
 </main>
 
 <script>
-  const SUPABASE_URL = 'https://zhauqnqiesufhqdahdqg.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoYXVxbnFpZXN1ZmhxZGFoZHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTkwMjksImV4cCI6MjA5MDk3NTAyOX0.-QRurZPZa4NxiZpzZqe0C3otHQDh36TOuDcWYP6eSZg';
+const SUPABASE_URL = 'https://zhauqnqiesufhqdahdqg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoYXVxbnFpZXN1ZmhxZGFoZHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTkwMjksImV4cCI6MjA5MDk3NTAyOX0.-QRurZPZa4NxiZpzZqe0C3otHQDh36TOuDcWYP6eSZg';
+let allDeals = [], currentFilter = 'all', currentSort = 'scraped_at';
 
-  let allDeals = [];
-  let currentFilter = 'all';
-  let currentSort = 'scraped_at';
+async function fetchDeals() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/deals?select=*&order=scraped_at.desc&limit=200`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+  return await res.json();
+}
 
-  async function fetchDeals() {
-    const params = new URLSearchParams({
-      select: '*',
-      order: 'scraped_at.desc',
-      limit: 200
-    });
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/deals?${params}`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`
-      }
-    });
-    return await res.json();
-  }
+function getCatClass(cat) {
+  if (!cat) return 'cat-tech';
+  if (cat.includes('Tech')) return 'cat-tech';
+  if (cat.includes('Maison')) return 'cat-maison';
+  if (cat.includes('Beauté')) return 'cat-beaute';
+  return 'cat-sport';
+}
 
-  function getCategoryClass(cat) {
-    if (!cat) return 'cat-tech';
-    if (cat.includes('Tech')) return 'cat-tech';
-    if (cat.includes('Maison')) return 'cat-maison';
-    if (cat.includes('Beauté')) return 'cat-beaute';
-    if (cat.includes('Sport')) return 'cat-sport';
-    return 'cat-tech';
-  }
+function getCatEmoji(cat) {
+  if (!cat) return '🏷️';
+  if (cat.includes('Tech')) return '📱';
+  if (cat.includes('Maison')) return '🏠';
+  if (cat.includes('Beauté')) return '✨';
+  return '⚡';
+}
 
-  function getScoreColor(score) {
-    if (score >= 7) return '#00E5A0';
-    if (score >= 5) return '#FFB800';
-    return 'rgba(240,238,232,0.3)';
-  }
+function getScoreColor(s) {
+  return s >= 7 ? '#00E5A0' : s >= 5 ? '#FFB800' : 'rgba(240,238,232,0.2)';
+}
 
-  function getScoreClass(score) {
-    if (score >= 7) return 'score-high';
-    if (score >= 5) return 'score-mid';
-    return 'score-low';
-  }
+function getScoreClass(s) {
+  return s >= 7 ? 'score-high' : s >= 5 ? 'score-mid' : 'score-low';
+}
 
-  function formatPrice(p) {
-    if (!p) return '?';
-    return parseFloat(p).toLocaleString('fr-MA') + ' MAD';
-  }
+function fmtPrice(p) {
+  if (!p) return '?';
+  return parseFloat(p).toLocaleString('fr-MA') + ' MAD';
+}
 
-  function formatDate(d) {
-    if (!d) return '';
-    return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-  }
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+}
 
-  function renderCard(deal, index) {
-    const discount = deal.discount_pct;
-    const saving = deal.old_price && deal.price
-      ? Math.round(deal.old_price - deal.price)
-      : null;
-
+function renderImage(deal, index) {
+  if (deal.image_url) {
     return `
-      <div class="deal-card" style="animation-delay: ${index * 0.04}s" onclick="${deal.url ? `window.open('${deal.url}','_blank')` : ''}">
-        <div class="card-header">
-          <span class="category-badge ${getCategoryClass(deal.category)}">${deal.category || 'Général'}</span>
-          ${discount && discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
+      <div class="card-image">
+        <img src="${deal.image_url}" 
+             alt="${deal.title}"
+             loading="lazy"
+             onerror="this.parentElement.innerHTML='<div class=\\'card-image-placeholder\\'><div class=\\'placeholder-icon\\'>${getCatEmoji(deal.category)}</div><div class=\\'placeholder-text\\'>Image indisponible</div></div>'"
+        />
+        ${deal.discount_pct > 0 ? `<div class="discount-overlay">-${deal.discount_pct}%</div>` : ''}
+      </div>`;
+  }
+  return `
+    <div class="card-image">
+      <div class="card-image-placeholder">
+        <div class="placeholder-icon">${getCatEmoji(deal.category)}</div>
+        <div class="placeholder-text">Pas d'image</div>
+      </div>
+      ${deal.discount_pct > 0 ? `<div class="discount-overlay">-${deal.discount_pct}%</div>` : ''}
+    </div>`;
+}
+
+function renderCard(deal, i) {
+  const saving = deal.old_price && deal.price ? Math.round(deal.old_price - deal.price) : null;
+  return `
+    <div class="deal-card" style="animation-delay:${i*.04}s" onclick="${deal.url ? `window.open('${deal.url}','_blank')` : ''}">
+      ${renderImage(deal, i)}
+      <div class="card-header">
+        <span class="category-badge ${getCatClass(deal.category)}">${deal.category || 'Général'}</span>
+      </div>
+      <div class="card-body">
+        <div class="deal-title">${deal.title}</div>
+        <div class="deal-enseigne">🏪 ${deal.enseigne || '—'}${deal.brand ? ' · ' + deal.brand : ''}</div>
+        <div class="price-row">
+          <span class="price-current">${fmtPrice(deal.price)}</span>
+          ${deal.old_price ? `<span class="price-old">${fmtPrice(deal.old_price)}</span>` : ''}
+          ${saving && saving > 0 ? `<span class="saving">-${saving.toLocaleString('fr-MA')} MAD</span>` : ''}
         </div>
-        <div class="card-body">
-          <div class="deal-title">${deal.title}</div>
-          <div class="deal-enseigne">🏪 ${deal.enseigne || '—'} ${deal.brand ? `· ${deal.brand}` : ''}</div>
-          <div class="price-row">
-            <span class="price-current">${formatPrice(deal.price)}</span>
-            ${deal.old_price ? `<span class="price-old">${formatPrice(deal.old_price)}</span>` : ''}
-            ${saving && saving > 0 ? `<span class="saving">-${saving.toLocaleString('fr-MA')} MAD</span>` : ''}
+        <div class="score-row">
+          <div class="score-track">
+            <div class="score-fill" style="width:${deal.score*10}%;background:${getScoreColor(deal.score)}"></div>
           </div>
-          <div class="score-row">
-            <div class="score-track">
-              <div class="score-fill" style="width: ${deal.score * 10}%; background: ${getScoreColor(deal.score)}"></div>
-            </div>
-            <span class="score-text ${getScoreClass(deal.score)}">${deal.score}/10</span>
-          </div>
-          <div class="card-footer">
-            <span class="deal-date">${formatDate(deal.scraped_at)}</span>
-            ${deal.url ? `<a class="view-btn" href="${deal.url}" target="_blank" onclick="event.stopPropagation()">Voir →</a>` : ''}
-          </div>
+          <span class="score-text ${getScoreClass(deal.score)}">${deal.score}/10</span>
+        </div>
+        <div class="card-footer">
+          <span class="deal-date">${fmtDate(deal.scraped_at)}</span>
+          ${deal.url ? `<a class="view-btn" href="${deal.url}" target="_blank" onclick="event.stopPropagation()">Voir →</a>` : ''}
         </div>
       </div>
-    `;
+    </div>`;
+}
+
+function renderDeals() {
+  const grid = document.getElementById('dealsGrid');
+  let deals = [...allDeals];
+  if (currentFilter !== 'all') deals = deals.filter(d => d.category === currentFilter);
+  if (currentSort === 'score') deals.sort((a,b) => b.score - a.score);
+  else if (currentSort === 'discount_pct') deals.sort((a,b) => (b.discount_pct||0) - (a.discount_pct||0));
+  else if (currentSort === 'price_asc') deals.sort((a,b) => a.price - b.price);
+  else deals.sort((a,b) => new Date(b.scraped_at) - new Date(a.scraped_at));
+  if (!deals.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Aucun deal</div><div>Le scraper tourne à 8h et 20h chaque jour</div></div>`;
+    return;
   }
+  grid.innerHTML = deals.map((d,i) => renderCard(d,i)).join('');
+}
 
-  function renderDeals() {
-    const grid = document.getElementById('dealsGrid');
-    let deals = [...allDeals];
+function updateStats() {
+  document.getElementById('statTotal').textContent = allDeals.length;
+  const avg = allDeals.length ? (allDeals.reduce((s,d)=>s+(d.score||0),0)/allDeals.length).toFixed(1) : '—';
+  document.getElementById('statAvgScore').textContent = avg;
+  const wd = allDeals.filter(d=>d.discount_pct>0);
+  document.getElementById('statAvgDiscount').textContent = wd.length ? Math.round(wd.reduce((s,d)=>s+d.discount_pct,0)/wd.length)+'%' : '—';
+  const top = allDeals.reduce((a,b)=>(b.score>(a?.score||0)?b:a),null);
+  document.getElementById('statTopDeal').textContent = top ? top.title.slice(0,22)+(top.title.length>22?'…':'') : '—';
+  const latest = allDeals.reduce((a,b)=>new Date(b.scraped_at)>new Date(a?.scraped_at||0)?b:a,null);
+  document.getElementById('lastUpdate').textContent = latest ? 'Mis à jour ' + new Date(latest.scraped_at).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+}
 
-    // Filter
-    if (currentFilter !== 'all') {
-      deals = deals.filter(d => d.category === currentFilter);
-    }
-
-    // Sort
-    if (currentSort === 'score') {
-      deals.sort((a, b) => b.score - a.score);
-    } else if (currentSort === 'discount_pct') {
-      deals.sort((a, b) => (b.discount_pct || 0) - (a.discount_pct || 0));
-    } else if (currentSort === 'price_asc') {
-      deals.sort((a, b) => a.price - b.price);
-    } else {
-      deals.sort((a, b) => new Date(b.scraped_at) - new Date(a.scraped_at));
-    }
-
-    if (deals.length === 0) {
-      grid.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <div class="empty-title">Aucun deal dans cette catégorie</div>
-          <div>Le scraper tourne à 8h et 20h chaque jour</div>
-        </div>`;
-      return;
-    }
-
-    grid.innerHTML = deals.map((d, i) => renderCard(d, i)).join('');
-  }
-
-  function updateStats() {
-    const deals = allDeals;
-    document.getElementById('statTotal').textContent = deals.length;
-
-    const avgScore = deals.length
-      ? (deals.reduce((s, d) => s + (d.score || 0), 0) / deals.length).toFixed(1)
-      : '—';
-    document.getElementById('statAvgScore').textContent = avgScore;
-
-    const withDiscount = deals.filter(d => d.discount_pct > 0);
-    const avgDiscount = withDiscount.length
-      ? Math.round(withDiscount.reduce((s, d) => s + d.discount_pct, 0) / withDiscount.length) + '%'
-      : '—';
-    document.getElementById('statAvgDiscount').textContent = avgDiscount;
-
-    const top = deals.reduce((a, b) => (b.score > (a?.score || 0) ? b : a), null);
-    document.getElementById('statTopDeal').textContent = top
-      ? top.title.slice(0, 22) + (top.title.length > 22 ? '…' : '')
-      : '—';
-
-    const latest = deals.reduce((a, b) =>
-      new Date(b.scraped_at) > new Date(a?.scraped_at || 0) ? b : a, null);
-    document.getElementById('lastUpdate').textContent = latest
-      ? 'Mis à jour ' + new Date(latest.scraped_at).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
-      : '';
-  }
-
-  async function loadDeals() {
-    document.getElementById('dealsGrid').innerHTML = `
-      <div class="loading"><div class="spinner"></div><div>Chargement...</div></div>`;
-    try {
-      allDeals = await fetchDeals();
-      updateStats();
-      renderDeals();
-    } catch (e) {
-      document.getElementById('dealsGrid').innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">⚠️</div>
-          <div class="empty-title">Erreur de connexion</div>
-          <div>${e.message}</div>
-        </div>`;
-    }
-  }
-
-  function setFilter(cat, btn) {
-    currentFilter = cat;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+async function loadDeals() {
+  document.getElementById('dealsGrid').innerHTML = '<div class="loading"><div class="spinner"></div><div>Chargement...</div></div>';
+  try {
+    allDeals = await fetchDeals();
+    updateStats();
     renderDeals();
+  } catch(e) {
+    document.getElementById('dealsGrid').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Erreur de connexion</div><div>${e.message}</div></div>`;
   }
+}
 
-  function setSort(val) {
-    currentSort = val;
-    renderDeals();
-  }
+function setFilter(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDeals();
+}
 
-  loadDeals();
-  // Auto-refresh toutes les 5 minutes
-  setInterval(loadDeals, 5 * 60 * 1000);
+function setSort(val) { currentSort = val; renderDeals(); }
+
+loadDeals();
+setInterval(loadDeals, 5*60*1000);
 </script>
 </body>
 </html>
