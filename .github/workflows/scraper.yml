@@ -1,0 +1,37 @@
+name: Promos Maroc — Scraper Automatique
+
+on:
+  schedule:
+    # Tourne à 8h00 et 20h00 (heure Maroc = UTC+1)
+    - cron: "0 7 * * *"   # 8h Maroc
+    - cron: "0 19 * * *"  # 20h Maroc
+  workflow_dispatch:       # Permet de lancer manuellement depuis GitHub
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Installation des dépendances
+        run: npm install
+
+      - name: Lancement du scraper
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node scraper.js
+
+      - name: Résumé
+        if: always()
+        run: echo "✅ Scraping terminé — $(date)"
