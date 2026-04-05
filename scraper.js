@@ -2,57 +2,68 @@
 // PROMOS MAROC — Scraper Intelligent (Claude API + Web Search)
 // Tourne 2x/jour via GitHub Actions
 // ============================================================
- 
+
 const Anthropic = require("@anthropic-ai/sdk");
 const { createClient } = require("@supabase/supabase-js");
- 
+
 // --- Config (variables d'environnement GitHub Actions) ---
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
- 
-// --- Catégories à tracker ---
+
+// --- Sites agrégateurs marocains ---
+// Ces sites compilent déjà les promos de toutes les grandes enseignes du Maroc
+// Avantage : accessibles, riches, mis à jour régulièrement, pas de blocage Cloudflare
+const AGGREGATORS = [
+  { url: "https://promomaroc.com", name: "PromoMaroc" },
+  { url: "https://soldemaroc.com", name: "SoldeMaroc" },
+  { url: "https://promotionemaroc.com", name: "PromotionMaroc" },
+  { url: "https://promotionaumaroc.com", name: "PromotionAuMaroc" },
+  { url: "https://hmizate.ma/deal", name: "Hmizate" },
+];
+
+// --- Catégories à tracker avec requêtes ciblées sur les agrégateurs ---
 const CATEGORIES = [
   {
     name: "Électronique & Tech",
     queries: [
-      "promotions smartphones électronique Maroc aujourd'hui -jumia -temu",
-      "soldes TV ordinateur portable Maroc site:.ma",
-      "deals electroplanet marjane electro Maroc semaine",
+      "site:promomaroc.com electroplanet promotion électronique smartphone TV 2026",
+      "site:soldemaroc.com électronique tech promotion Maroc 2026",
+      "site:hmizate.ma deals électronique tech smartphone Maroc",
     ],
   },
   {
     name: "Maison & Déco",
     queries: [
-      "promotions meubles décoration maison Maroc aujourd'hui -jumia",
-      "soldes electroménager cuisine Maroc site:.ma",
-      "deals ikea kitea marjane maison Maroc",
+      "site:promomaroc.com kitea ikea mobilia promotion maison déco Maroc 2026",
+      "site:soldemaroc.com maison déco electroménager promotion Maroc 2026",
+      "site:hmizate.ma maison déco deals Maroc",
     ],
   },
   {
     name: "Beauté & Santé",
     queries: [
-      "promotions cosmétiques beauté santé Maroc aujourd'hui -jumia -temu",
-      "soldes parfum soin corps pharmacie Maroc site:.ma",
-      "deals beauté health Maroc cette semaine",
+      "site:promomaroc.com oriflame avon beauté santé promotion Maroc 2026",
+      "site:soldemaroc.com beauté santé cosmétique promotion Maroc 2026",
+      "site:hmizate.ma beauté santé deals Maroc",
     ],
   },
   {
     name: "Sport & Loisirs",
     queries: [
-      "promotions sport fitness loisirs Maroc aujourd'hui -jumia",
-      "soldes vêtements sport équipement Maroc site:.ma",
-      "deals sport décathlon intersport Maroc semaine",
+      "site:promomaroc.com decathlon kiabi sport promotion Maroc 2026",
+      "site:soldemaroc.com sport loisirs promotion Maroc 2026",
+      "site:hmizate.ma sport loisirs deals Maroc",
     ],
   },
 ];
- 
+
 // --- Score automatique basé sur critères ---
 function computeScore({ price, oldPrice, brand, enseigne, category }) {
   let score = 0;
- 
+
   // 1. % de réduction (4 pts max)
   if (oldPrice && price && oldPrice > price) {
     const pct = ((oldPrice - price) / oldPrice) * 100;
@@ -61,7 +72,7 @@ function computeScore({ price, oldPrice, brand, enseigne, category }) {
     else if (pct >= 20) score += 2;
     else if (pct >= 10) score += 1;
   }
- 
+
   // 2. Marque connue (2 pts max)
   const knownBrands = [
     "samsung", "apple", "lg", "sony", "bosch", "tefal", "xiaomi",
@@ -73,7 +84,7 @@ function computeScore({ price, oldPrice, brand, enseigne, category }) {
   } else if (brand) {
     score += 1;
   }
- 
+
   // 3. Prix accessible marché marocain (2 pts max)
   const limits = {
     "Électronique & Tech": { good: 3000, great: 1500 },
@@ -84,7 +95,7 @@ function computeScore({ price, oldPrice, brand, enseigne, category }) {
   const lim = limits[category] || { good: 2000, great: 1000 };
   if (price <= lim.great) score += 2;
   else if (price <= lim.good) score += 1;
- 
+
   // 4. Enseigne fiable (1 pt)
   const trusted = [
     "electroplanet", "marjane", "carrefour", "bim", "aswak",
@@ -93,25 +104,25 @@ function computeScore({ price, oldPrice, brand, enseigne, category }) {
   if (enseigne && trusted.some((e) => enseigne.toLowerCase().includes(e))) {
     score += 1;
   }
- 
+
   return Math.min(10, Math.max(1, score));
 }
- 
+
 // --- Pause intelligente ---
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
- 
+
 // --- Appel Claude avec web search + retry automatique ---
 async function searchDeals(query, category, retries = 3) {
   console.log(`🔍 Recherche : "${query}"`);
- 
+
   const prompt = `Tu es un expert en deals et promotions pour le marché marocain.
- 
+
 Recherche sur le web les meilleures promotions pour cette requête : "${query}"
- 
+
 Objectif : trouver des vraies promotions actives au Maroc (pas Jumia, pas Temu).
- 
+
 Pour chaque deal trouvé, extrais :
 - Le nom exact du produit
 - L'enseigne/site vendeur
@@ -120,7 +131,7 @@ Pour chaque deal trouvé, extrais :
 - L'ancien prix en MAD (si disponible)
 - L'URL directe vers le produit
 - La date d'expiration si mentionnée
- 
+
 Réponds UNIQUEMENT avec un tableau JSON valide (pas de texte avant/après, pas de backticks) :
 [
   {
@@ -133,10 +144,10 @@ Réponds UNIQUEMENT avec un tableau JSON valide (pas de texte avant/après, pas 
     "expires_at": "2024-12-31" ou null
   }
 ]
- 
+
 Si tu ne trouves aucun deal, retourne un tableau vide : []
 Maximum 5 deals par recherche. Ne mets QUE des deals avec un vrai prix en MAD.`;
- 
+
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const response = await anthropic.messages.create({
@@ -145,15 +156,15 @@ Maximum 5 deals par recherche. Ne mets QUE des deals avec un vrai prix en MAD.`;
         tools: [{ type: "web_search_20250305", name: "web_search" }],
         messages: [{ role: "user", content: prompt }],
       });
- 
+
       const textBlocks = response.content
         .filter((b) => b.type === "text")
         .map((b) => b.text)
         .join("");
- 
+
       const jsonMatch = textBlocks.match(/\[[\s\S]*\]/);
       if (!jsonMatch) return [];
- 
+
       const deals = JSON.parse(jsonMatch[0]);
       return deals
         .filter((d) => d.title && d.price && d.price > 0)
@@ -169,7 +180,7 @@ Maximum 5 deals par recherche. Ne mets QUE des deals avec un vrai prix en MAD.`;
           }),
           scraped_at: new Date().toISOString(),
         }));
- 
+
     } catch (err) {
       // Rate limit (429) : attendre et réessayer
       if (err.message && err.message.includes("429")) {
@@ -182,11 +193,11 @@ Maximum 5 deals par recherche. Ne mets QUE des deals avec un vrai prix en MAD.`;
       }
     }
   }
- 
+
   console.error(`❌ Échec après ${retries} tentatives pour "${query}"`);
   return [];
 }
- 
+
 // --- Vérifie si un deal existe déjà (évite les doublons) ---
 async function dealExists(title, enseigne) {
   const { data } = await supabase
@@ -198,7 +209,7 @@ async function dealExists(title, enseigne) {
     .limit(1);
   return data && data.length > 0;
 }
- 
+
 // --- Sauvegarde les deals dans Supabase ---
 async function saveDeals(deals) {
   let saved = 0;
@@ -233,36 +244,36 @@ async function saveDeals(deals) {
   }
   return saved;
 }
- 
+
 // --- Programme principal ---
 async function main() {
   console.log("🚀 Promos Maroc Scraper — Démarrage");
   console.log(`📅 ${new Date().toLocaleString("fr-FR")}`);
   console.log("=".repeat(50));
- 
+
   let totalDeals = 0;
- 
+
   for (const category of CATEGORIES) {
     console.log(`\n📦 Catégorie : ${category.name}`);
- 
+
     for (const query of category.queries) {
       const deals = await searchDeals(query, category.name);
       console.log(`   Trouvés : ${deals.length} deals`);
- 
+
       if (deals.length > 0) {
         const saved = await saveDeals(deals);
         totalDeals += saved;
       }
- 
+
       // Pause de 25 secondes entre chaque requête pour éviter le rate limit
       console.log(`⏳ Pause 25s avant la prochaine recherche...`);
       await sleep(25000);
     }
   }
- 
+
   console.log("\n" + "=".repeat(50));
   console.log(`🎉 Terminé ! ${totalDeals} nouveaux deals sauvegardés`);
- 
+
   // Nettoyer les vieux deals (+7 jours)
   const { error } = await supabase
     .from("deals")
@@ -273,6 +284,5 @@ async function main() {
     );
   if (!error) console.log("🧹 Vieux deals nettoyés (>7 jours)");
 }
- 
+
 main().catch(console.error);
- 
