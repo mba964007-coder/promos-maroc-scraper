@@ -130,6 +130,7 @@ Pour chaque deal trouvé, extrais :
 - Le prix actuel en MAD (dirham marocain)
 - L'ancien prix en MAD (si disponible)
 - L'URL directe vers le produit
+- L'URL de l'image du produit (cherche la vraie image du produit sur le site de l'enseigne ou sur Google Images)
 - La date d'expiration si mentionnée
 
 Réponds UNIQUEMENT avec un tableau JSON valide (pas de texte avant/après, pas de backticks) :
@@ -141,6 +142,7 @@ Réponds UNIQUEMENT avec un tableau JSON valide (pas de texte avant/après, pas 
     "price": 999,
     "old_price": 1499,
     "url": "https://...",
+    "image_url": "https://... (URL directe vers l'image du produit, format jpg/png/webp)" ou null,
     "expires_at": "2024-12-31" ou null
   }
 ]
@@ -227,6 +229,7 @@ async function saveDeals(deals) {
       old_price: deal.old_price || null,
       category: deal.category,
       url: deal.url || null,
+      image_url: deal.image_url || null,
       score: deal.score,
       expires_at: deal.expires_at || null,
       scraped_at: deal.scraped_at,
