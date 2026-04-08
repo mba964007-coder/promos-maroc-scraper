@@ -20,41 +20,38 @@ const CATEGORIES = [
   {
     name: "Électronique & Tech",
     queries: [
-      "electroplanet maroc promotion smartphone prix réduit avril 2026",
-      "micromagma maroc deals informatique PC portable prix réduit 2026",
-      "biougnach électroménager promotion prix réduit Maroc 2026",
-      "marjanemall electroménager TV promotion prix réduit Maroc 2026",
+      "discounts.ma electroplanet smartphone promotion prix MAD 2026",
+      "promomaroc.com electroplanet smartphone TV prix MAD 2026",
+      "discounts.ma micromagma informatique PC prix MAD",
     ],
   },
   {
     name: "Maison & Déco",
     queries: [
-      "marjanemall maison déco promotion prix réduit Maroc 2026",
-      "biougnach gros electroménager cuisine promotion prix réduit 2026",
-      "kitea ikea maroc mobilier déco promotion prix réduit 2026",
+      "discounts.ma marjane maison electroménager prix MAD",
+      "promomaroc.com biougnach kitea maison déco prix MAD 2026",
     ],
   },
   {
     name: "Beauté & Santé",
     queries: [
-      "marjanemall beauté santé cosmétique promotion prix réduit Maroc 2026",
-      "yves rocher maroc beauté promotion prix réduit 2026",
-      "pharmacie parapharmacie beauté santé promo Maroc 2026",
+      "discounts.ma beauté santé cosmétique promotion Maroc prix MAD",
+      "promomaroc.com beauté santé promotion prix MAD 2026",
     ],
   },
   {
     name: "Sport & Loisirs",
     queries: [
-      "decathlon maroc sport fitness promotion prix réduit 2026",
-      "marjanemall sport loisirs promotion prix réduit Maroc 2026",
+      "discounts.ma decathlon sport fitness promotion prix MAD Maroc",
+      "promomaroc.com sport loisirs promotion prix MAD 2026",
     ],
   },
   {
     name: "Immobilier",
     queries: [
-      "sarouty appartement louer Casablanca bon plan pas cher 2026",
-      "sarouty appartement louer Rabat Marrakech pas cher 2026",
-      "mubawab location appartement Maroc bon plan 2026",
+      "sarouty.ma appartement louer Casablanca prix MAD 2026",
+      "mubawab.ma location appartement Maroc prix MAD 2026",
+      "avito.ma location appartement Maroc pas cher 2026",
     ],
   },
 ];
@@ -133,81 +130,87 @@ function sleep(ms) {
 
 // --- Prompt produit style Dealabs ---
 function buildProductPrompt(query) {
-  return `Tu es un expert deals comme Dealabs, mais pour le marché marocain.
+  return `Tu es un chasseur de bons plans pour le marché marocain, comme Dealabs en France.
 
-Recherche sur le web : "${query}"
+Fais une recherche web approfondie sur : "${query}"
 
-IMPORTANT — Style Dealabs : chaque deal doit avoir :
-- Un produit PRÉCIS (pas une catégorie générale)
-- L'image RÉELLE du produit (URL directe .jpg/.png/.webp depuis le site marchand)
-- Le prix actuel ET l'ancien prix si disponible
-- Le lien direct vers la page produit (pas la page d'accueil)
+Ta mission : trouver des VRAIS produits en promotion actuellement au Maroc avec leur prix en dirhams.
 
-Pour chaque produit en promotion trouvé, extrais :
-- Titre court et accrocheur du produit
+Stratégie de recherche :
+1. Cherche directement sur les sites marchands marocains (electroplanet.ma, marjanemall.ma, micromagma.ma, biougnach.ma)
+2. Cherche aussi sur les agrégateurs (promomaroc.com, soldemaroc.com, hmizate.ma)
+3. Cherche sur Google Shopping Maroc
+4. Si tu trouves un prix en euros sur un site international, convertis (1€ ≈ 11 MAD)
+
+Pour chaque produit trouvé avec un prix en dirhams :
+- Titre précis du produit (marque + modèle)
 - Marque
-- Enseigne/site vendeur
-- Prix actuel en MAD
-- Ancien prix en MAD (si barré sur la page)
-- URL directe vers la page du produit
-- URL de l'image du produit (cherche l'image sur la page produit ou Google Images)
-- Brève description 1 phrase max
+- Nom du site vendeur
+- Prix actuel en MAD (nombre entier)
+- Ancien prix en MAD si visible (nombre entier ou null)
+- URL de la page produit
+- URL de l'image du produit (cherche sur le site ou Google Images)
+- Description courte 1 phrase
 
-Réponds UNIQUEMENT avec un JSON valide sans backticks :
+IMPORTANT : Si tu ne trouves pas de prix exact en MAD, estime le prix en MAD d'après les prix EUR/USD et note-le quand même. Ne retourne JAMAIS un tableau vide si tu as trouvé des produits liés à la requête.
+
+Réponds UNIQUEMENT avec un JSON valide, sans texte avant ou après :
 [
   {
-    "title": "Samsung Galaxy A55 5G 128Go",
+    "title": "Samsung Galaxy A35 5G 128Go Bleu",
     "brand": "Samsung",
     "enseigne": "Electroplanet",
-    "price": 3499,
-    "old_price": 4299,
-    "url": "https://www.electroplanet.ma/...",
-    "image_url": "https://www.electroplanet.ma/media/catalog/product/s/a/samsung_a55.jpg",
-    "description": "Smartphone 5G avec écran Super AMOLED 6.6 pouces"
+    "price": 3799,
+    "old_price": 4499,
+    "url": "https://www.electroplanet.ma/samsung-galaxy-a35.html",
+    "image_url": "https://www.electroplanet.ma/media/catalog/product/samsung_a35.jpg",
+    "description": "Smartphone 5G écran 6.6 pouces 50MP"
   }
 ]
 
-Maximum 5 deals. Uniquement des produits avec prix en MAD. Tableau vide [] si rien trouvé.`;
+Maximum 5 deals pertinents.`;
 }
 
 // --- Prompt immobilier ---
 function buildRealEstatePrompt(query) {
-  return `Tu es un expert immobilier pour le marché marocain, style Sarouty/Mubawab.
+  return `Tu es un expert immobilier marocain. Cherche des annonces de location sur sarouty.ma, mubawab.ma, avito.ma et autres sites immobiliers marocains.
 
-Recherche sur le web : "${query}"
+Fais une recherche web sur : "${query}"
 
-Pour chaque annonce de location trouvée, extrais :
-- Titre de l'annonce (ex: "Appartement 2 pièces Maarif Casablanca")
+Pour chaque annonce de location trouvée, extrais toutes les infos disponibles :
+- Titre descriptif (type de bien, quartier, ville)
 - Ville et quartier précis
-- Surface en m²
-- Prix de location mensuel en MAD
-- Nombre de pièces
+- Surface en m² (si mentionnée)
+- Loyer mensuel en MAD
+- Nombre de pièces/chambres
 - URL directe vers l'annonce
-- URL de la photo principale du bien
-- Description courte (équipements, état, étage)
-- Adresse approximative si disponible
+- URL de la photo principale
+- Description courte : équipements, état, étage, meublé ou non
+- Adresse ou rue si disponible
 
-Réponds UNIQUEMENT avec un JSON valide sans backticks :
+IMPORTANT : Ne retourne JAMAIS un tableau vide. S'il existe des annonces sur ces sites, liste-les.
+
+Réponds UNIQUEMENT avec un JSON valide sans texte avant ou après :
 [
   {
-    "title": "Appartement 2 pièces - Maarif, Casablanca",
+    "title": "Appartement S+2 meublé - Maarif, Casablanca",
     "brand": null,
     "enseigne": "Sarouty",
-    "price": 4500,
+    "price": 5500,
     "old_price": null,
-    "url": "https://www.sarouty.ma/...",
-    "image_url": "https://...",
-    "description": "Appartement meublé 65m², 2 chambres, parking inclus",
-    "surface": 65,
+    "url": "https://www.sarouty.ma/annonce/...",
+    "image_url": "https://img.sarouty.ma/...",
+    "description": "Appartement meublé 80m², 2 chambres, 2ème étage, parking",
+    "surface": 80,
     "city": "Casablanca",
     "quartier": "Maarif",
-    "address": "Boulevard Zerktouni, Casablanca",
+    "address": "Rue Abou Inane, Maarif",
     "rooms": 2,
     "is_real_estate": true
   }
 ]
 
-Maximum 5 annonces. Uniquement des locations avec prix en MAD. Tableau vide [] si rien trouvé.`;
+Maximum 5 annonces pertinentes.`;
 }
 
 // --- Appel Claude avec retry ---
@@ -230,20 +233,49 @@ async function searchDeals(query, category, retries = 3) {
         .map((b) => b.text)
         .join("");
 
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) return [];
+      console.log(`   📝 Réponse IA (${text.length} chars): ${text.slice(0, 150)}...`);
 
-      const items = JSON.parse(jsonMatch[0]);
+      // Extraction JSON robuste - essaie plusieurs patterns
+      let items = [];
+      const patterns = [
+        /\[\s*\{[\s\S]*?\}\s*\]/,
+        /\[[\s\S]*\]/,
+      ];
+      for (const pat of patterns) {
+        const m = text.match(pat);
+        if (m) {
+          try {
+            items = JSON.parse(m[0]);
+            if (Array.isArray(items) && items.length > 0) break;
+          } catch(e) {
+            // try next pattern
+          }
+        }
+      }
+
+      if (!items.length) {
+        console.log(`   ⚠️ Aucun JSON valide trouvé dans la réponse`);
+        return [];
+      }
+
       return items
-        .filter((d) => d.title && d.price && d.price > 0)
-        .map((d) => ({
-          ...d,
-          category,
-          score: isRealEstate
-            ? computeRealEstateScore({ price: d.price, surface: d.surface, city: d.city })
-            : computeProductScore({ price: d.price, oldPrice: d.old_price, brand: d.brand, enseigne: d.enseigne, category }),
-          scraped_at: new Date().toISOString(),
-        }));
+        .filter((d) => d.title && (d.price || d.price === 0))
+        .map((d) => {
+          // Normalise price - peut être string ou number
+          const price = parseFloat(String(d.price).replace(/[^0-9.]/g, '')) || 0;
+          const oldPrice = d.old_price ? parseFloat(String(d.old_price).replace(/[^0-9.]/g, '')) || null : null;
+          return {
+            ...d,
+            price,
+            old_price: oldPrice,
+            category,
+            score: isRealEstate
+              ? computeRealEstateScore({ price, surface: d.surface, city: d.city })
+              : computeProductScore({ price, oldPrice, brand: d.brand, enseigne: d.enseigne, category }),
+            scraped_at: new Date().toISOString(),
+          };
+        })
+        .filter(d => d.price > 0);
 
     } catch (err) {
       if (err.message && err.message.includes("429")) {
