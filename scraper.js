@@ -13,53 +13,48 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// --- Sites cibles précis ---
-const SITES = {
-  electroplanet: "electroplanet.ma",
-  micromagma: "micromagma.ma",
-  marjane: "marjanemall.ma",
-  biougnach: "biougnach.ma",
-  sarouty: "sarouty.ma",
-};
-
 // --- Catégories produits + Immobilier ---
+// Stratégie : requêtes naturelles ciblant les enseignes par nom
+// Les requêtes site: bloquent sur la plupart des sites marocains
 const CATEGORIES = [
   {
     name: "Électronique & Tech",
     queries: [
-      `site:${SITES.electroplanet} promotion smartphone TV ordinateur prix réduit 2026`,
-      `site:${SITES.micromagma} promotion deals prix réduit informatique 2026`,
-      `site:${SITES.biougnach} promotion électroménager prix réduit 2026`,
+      "electroplanet maroc promotion smartphone prix réduit avril 2026",
+      "micromagma maroc deals informatique PC portable prix réduit 2026",
+      "biougnach électroménager promotion prix réduit Maroc 2026",
+      "marjanemall electroménager TV promotion prix réduit Maroc 2026",
     ],
   },
   {
     name: "Maison & Déco",
     queries: [
-      `site:${SITES.marjane} promotion maison déco électroménager prix réduit 2026`,
-      `site:${SITES.biougnach} promotion gros électroménager cuisine prix réduit 2026`,
-      `site:${SITES.electroplanet} promotion électroménager cuisine prix réduit 2026`,
+      "marjanemall maison déco promotion prix réduit Maroc 2026",
+      "biougnach gros electroménager cuisine promotion prix réduit 2026",
+      "kitea ikea maroc mobilier déco promotion prix réduit 2026",
     ],
   },
   {
     name: "Beauté & Santé",
     queries: [
-      `site:${SITES.marjane} promotion beauté santé cosmétique prix réduit 2026`,
-      `beauté santé cosmétique promotion Maroc site:.ma -jumia -temu 2026`,
+      "marjanemall beauté santé cosmétique promotion prix réduit Maroc 2026",
+      "yves rocher maroc beauté promotion prix réduit 2026",
+      "pharmacie parapharmacie beauté santé promo Maroc 2026",
     ],
   },
   {
     name: "Sport & Loisirs",
     queries: [
-      `site:${SITES.marjane} promotion sport loisirs fitness prix réduit 2026`,
-      `decathlon maroc promotion sport équipement prix réduit 2026`,
+      "decathlon maroc sport fitness promotion prix réduit 2026",
+      "marjanemall sport loisirs promotion prix réduit Maroc 2026",
     ],
   },
   {
     name: "Immobilier",
     queries: [
-      `site:${SITES.sarouty} appartement louer Casablanca prix pas cher 2026`,
-      `site:${SITES.sarouty} appartement louer Rabat Marrakech prix pas cher 2026`,
-      `site:${SITES.sarouty} studio louer Maroc bon plan pas cher 2026`,
+      "sarouty appartement louer Casablanca bon plan pas cher 2026",
+      "sarouty appartement louer Rabat Marrakech pas cher 2026",
+      "mubawab location appartement Maroc bon plan 2026",
     ],
   },
 ];
