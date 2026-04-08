@@ -16,42 +16,46 @@ const supabase = createClient(
 // --- Catégories produits + Immobilier ---
 // Stratégie : requêtes naturelles ciblant les enseignes par nom
 // Les requêtes site: bloquent sur la plupart des sites marocains
+// Stratégie finale : chercher les promos des enseignes cibles
+// sur les agrégateurs ouverts qui les référencent
 const CATEGORIES = [
   {
     name: "Électronique & Tech",
     queries: [
-      "discounts.ma electroplanet smartphone promotion prix MAD 2026",
-      "promomaroc.com electroplanet smartphone TV prix MAD 2026",
-      "discounts.ma micromagma informatique PC prix MAD",
+      "site:promomaroc.com electroplanet promotion prix MAD",
+      "site:promomaroc.com micromagma biougnach promotion prix MAD",
+      "site:discounts.ma electroplanet smartphone TV prix dh",
+      "site:soldemaroc.com electroplanet promotion prix MAD",
     ],
   },
   {
     name: "Maison & Déco",
     queries: [
-      "discounts.ma marjane maison electroménager prix MAD",
-      "promomaroc.com biougnach kitea maison déco prix MAD 2026",
+      "site:promomaroc.com marjanemall kitea maison déco promotion prix MAD",
+      "site:discounts.ma marjane maison electroménager prix dh",
+      "site:soldemaroc.com marjane maison promotion prix MAD",
     ],
   },
   {
     name: "Beauté & Santé",
     queries: [
-      "discounts.ma beauté santé cosmétique promotion Maroc prix MAD",
-      "promomaroc.com beauté santé promotion prix MAD 2026",
+      "site:promomaroc.com beauté santé cosmétique promotion prix MAD",
+      "site:discounts.ma beauté santé pharmacie promotion prix dh",
     ],
   },
   {
     name: "Sport & Loisirs",
     queries: [
-      "discounts.ma decathlon sport fitness promotion prix MAD Maroc",
-      "promomaroc.com sport loisirs promotion prix MAD 2026",
+      "site:promomaroc.com decathlon sport fitness promotion prix MAD",
+      "site:discounts.ma sport loisirs promotion prix dh Maroc",
     ],
   },
   {
     name: "Immobilier",
     queries: [
-      "sarouty.ma appartement louer Casablanca prix MAD 2026",
-      "mubawab.ma location appartement Maroc prix MAD 2026",
-      "avito.ma location appartement Maroc pas cher 2026",
+      "site:sarouty.ma appartement louer Casablanca prix MAD",
+      "site:sarouty.ma appartement louer Rabat Marrakech prix MAD",
+      "site:avito.ma location appartement Maroc prix MAD",
     ],
   },
 ];
@@ -126,6 +130,22 @@ function computeRealEstateScore({ price, surface, city }) {
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+// --- Récupère une image via Google Custom Search ---
+async function fetchProductImage(query) {
+  try {
+    const q = encodeURIComponent(query + " product");
+    const url = `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=96e7105d287094ab7&q=${q}&searchType=image&num=1&safe=active`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.items && data.items[0]) {
+      return data.items[0].link;
+    }
+  } catch (e) {
+    // silently fail
+  }
+  return null;
 }
 
 // --- Prompt produit style Dealabs ---
@@ -258,10 +278,9 @@ async function searchDeals(query, category, retries = 3) {
         return [];
       }
 
-      return items
+      const rawDeals = items
         .filter((d) => d.title && (d.price || d.price === 0))
         .map((d) => {
-          // Normalise price - peut être string ou number
           const price = parseFloat(String(d.price).replace(/[^0-9.]/g, '')) || 0;
           const oldPrice = d.old_price ? parseFloat(String(d.old_price).replace(/[^0-9.]/g, '')) || null : null;
           return {
@@ -276,6 +295,22 @@ async function searchDeals(query, category, retries = 3) {
           };
         })
         .filter(d => d.price > 0);
+
+      // Récupère les images manquantes via Google Custom Search
+      for (const deal of rawDeals) {
+        if (!deal.image_url) {
+          const imgQuery = deal.brand
+            ? `${deal.brand} ${deal.title}`
+            : `${deal.title} ${deal.enseigne || ''} Maroc`;
+          deal.image_url = await fetchProductImage(imgQuery);
+          if (deal.image_url) {
+            console.log(`   🖼️  Image trouvée pour : ${deal.title}`);
+          }
+          await sleep(500); // évite le rate limit Google
+        }
+      }
+
+      return rawDeals;
 
     } catch (err) {
       if (err.message && err.message.includes("429")) {
