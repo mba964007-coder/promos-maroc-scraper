@@ -3,273 +3,455 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Promos Maroc — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<title>Promos Maroc</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0A0A0F;
-    --surface: #12121A;
-    --surface2: #1A1A26;
-    --border: rgba(255,255,255,0.07);
-    --text: #F0EEE8;
-    --muted: rgba(240,238,232,0.45);
-    --accent: #FF4D2E;
-    --accent2: #FFB800;
-    --accent3: #00E5A0;
-    --blue: #4D8EFF;
-    --purple: #9B6DFF;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.4; }
-  .header { padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(10,10,15,0.92); backdrop-filter: blur(20px); z-index: 100; }
-  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
-  .logo-dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
-  .header-right { display: flex; align-items: center; gap: 16px; }
-  .last-update { font-size: 12px; color: var(--muted); font-weight: 300; }
-  .refresh-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
-  .refresh-btn:hover { background: var(--surface); border-color: rgba(255,255,255,.15); }
-  .stats-bar { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
-  .stat { background: var(--bg); padding: 20px 32px; }
-  .stat-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; display: block; }
-  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
-  .main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
-  .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
-  .filter-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-right: 4px; }
-  .filter-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 7px 16px; border-radius: 100px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; white-space: nowrap; }
-  .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
-  .filter-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 500; }
-  .sort-select { margin-left: auto; background: var(--surface); border: 1px solid var(--border); color: var(--muted); padding: 7px 14px; border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; outline: none; }
-  .deals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-  .deal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: all .25s cubic-bezier(.4,0,.2,1); animation: fadeIn .4s ease both; cursor: pointer; display: flex; flex-direction: column; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-  .deal-card:hover { border-color: rgba(255,255,255,.15); transform: translateY(-3px); box-shadow: 0 20px 40px rgba(0,0,0,.4); }
+:root {
+  --bg:#0C0C12; --surface:#14141E; --surface2:#1C1C2A;
+  --border:rgba(255,255,255,0.07); --text:#F2F0EA; --muted:rgba(242,240,234,0.4);
+  --red:#FF4500; --gold:#FFB800; --green:#00D68F; --blue:#4D8EFF; --purple:#9B6DFF;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-  /* Image */
-  .card-image { width: 100%; height: 180px; overflow: hidden; background: var(--surface2); position: relative; flex-shrink: 0; }
-  .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; }
-  .deal-card:hover .card-image img { transform: scale(1.05); }
-  .card-image-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--muted); }
-  .placeholder-icon { font-size: 36px; opacity: 0.4; }
-  .placeholder-text { font-size: 11px; opacity: 0.4; }
-  .discount-overlay { position: absolute; top: 12px; right: 12px; background: var(--accent); color: white; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 8px; }
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:18px 36px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(12,12,18,0.95);backdrop-filter:blur(16px);z-index:200}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;display:flex;align-items:center;gap:8px}
+.logo-pulse{width:8px;height:8px;background:var(--red);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.7);opacity:.5}}
+.header-right{display:flex;align-items:center;gap:12px}
+.update-badge{font-size:11px;color:var(--muted);background:var(--surface2);padding:5px 12px;border-radius:20px}
+.btn-refresh{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
+.btn-refresh:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
 
-  .card-header { padding: 14px 16px 0; }
-  .category-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 100px; letter-spacing: .3px; display: inline-block; }
-  .cat-tech { background: rgba(77,142,255,.15); color: var(--blue); }
-  .cat-maison { background: rgba(155,109,255,.15); color: var(--purple); }
-  .cat-beaute { background: rgba(255,184,0,.15); color: var(--accent2); }
-  .cat-sport { background: rgba(0,229,160,.15); color: var(--accent3); }
-  .card-body { padding: 12px 16px 16px; flex: 1; display: flex; flex-direction: column; }
-  .deal-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; line-height: 1.35; margin-bottom: 4px; color: var(--text); }
-  .deal-enseigne { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-  .price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-  .price-current { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); }
-  .price-old { font-size: 13px; color: var(--muted); text-decoration: line-through; }
-  .saving { font-size: 11px; color: var(--accent3); font-weight: 500; }
-  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; margin-top: auto; }
-  .score-track { flex: 1; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
-  .score-fill { height: 100%; border-radius: 2px; }
-  .score-text { font-size: 12px; font-weight: 500; min-width: 32px; text-align: right; }
-  .score-high { color: var(--accent3); }
-  .score-mid { color: var(--accent2); }
-  .score-low { color: var(--muted); }
-  .card-footer { display: flex; justify-content: space-between; align-items: center; }
-  .deal-date { font-size: 11px; color: var(--muted); }
-  .view-btn { font-size: 12px; font-weight: 500; color: var(--text); text-decoration: none; background: var(--surface2); border: 1px solid var(--border); padding: 6px 14px; border-radius: 8px; transition: all .2s; display: inline-block; }
-  .view-btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); }
-  .empty-state { text-align: center; padding: 80px 20px; color: var(--muted); grid-column: 1/-1; }
-  .empty-icon { font-size: 48px; margin-bottom: 16px; }
-  .empty-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-  .loading { text-align: center; padding: 80px 20px; color: var(--muted); grid-column: 1/-1; }
-  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  @media(max-width:768px) { .header{padding:16px 20px} .stats-bar{grid-template-columns:repeat(2,1fr)} .main{padding:20px} .deals-grid{grid-template-columns:1fr} }
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border)}
+.stat{padding:16px 28px;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-n{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;display:block}
+.stat-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-top:2px}
+
+/* FILTERS */
+.filters{padding:20px 36px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.fl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-right:6px}
+.f-btn{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:6px 16px;border-radius:100px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;white-space:nowrap}
+.f-btn:hover{color:var(--text)}
+.f-btn.on{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:500}
+.sort{margin-left:auto;background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px;padding:24px 36px}
+
+/* DEAL CARD — style Dealabs */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .22s ease;animation:up .35s ease both;cursor:pointer;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.15);box-shadow:0 16px 40px rgba(0,0,0,.5)}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Image */
+.card-img{width:100%;height:190px;background:var(--surface2);position:relative;overflow:hidden;flex-shrink:0}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.card:hover .card-img img{transform:scale(1.06)}
+.img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:42px;opacity:.25}
+.badge-pct{position:absolute;top:10px;left:10px;background:var(--red);color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:4px 10px;border-radius:7px}
+.badge-immo{position:absolute;top:10px;left:10px;background:var(--purple);color:#fff;font-size:11px;font-weight:500;padding:4px 10px;border-radius:7px}
+.badge-hot{position:absolute;top:10px;right:10px;background:var(--gold);color:#000;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
+
+/* Body */
+.card-body{padding:14px;flex:1;display:flex;flex-direction:column}
+.card-cat{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:100px;margin-bottom:8px}
+.cat-tech{background:rgba(77,142,255,.12);color:var(--blue)}
+.cat-maison{background:rgba(155,109,255,.12);color:var(--purple)}
+.cat-beaute{background:rgba(255,184,0,.12);color:var(--gold)}
+.cat-sport{background:rgba(0,214,143,.12);color:var(--green)}
+.cat-immo{background:rgba(155,109,255,.12);color:var(--purple)}
+.card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;line-height:1.3;margin-bottom:4px}
+.card-shop{font-size:12px;color:var(--muted);margin-bottom:10px}
+.price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.price-now{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--red)}
+.price-was{font-size:13px;color:var(--muted);text-decoration:line-through}
+.price-save{font-size:11px;color:var(--green);font-weight:500}
+.immo-meta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.immo-pill{background:var(--surface2);border:1px solid var(--border);font-size:11px;color:var(--muted);padding:3px 9px;border-radius:6px}
+
+/* Score */
+.score-row{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:10px}
+.score-bar{flex:1;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.score-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.score-val{font-size:11px;font-weight:500;min-width:28px;text-align:right}
+.s-high{color:var(--green)} .s-mid{color:var(--gold)} .s-low{color:var(--muted)}
+
+/* Footer */
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.card-date{font-size:11px;color:var(--muted)}
+.btn-deal{font-size:12px;font-weight:500;color:var(--text);text-decoration:none;background:var(--surface2);border:1px solid var(--border);padding:5px 12px;border-radius:7px;transition:.2s;display:inline-block}
+.btn-deal:hover{background:var(--text);color:var(--bg)}
+.btn-map{font-size:12px;font-weight:500;color:var(--purple);background:rgba(155,109,255,.1);border:1px solid rgba(155,109,255,.2);padding:5px 12px;border-radius:7px;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif}
+.btn-map:hover{background:rgba(155,109,255,.2)}
+
+/* MODAL Distance */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px;width:90%;max-width:520px;position:relative}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.modal-prop{background:var(--surface2);border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--muted)}
+.modal-prop strong{color:var(--text);display:block;font-size:14px;margin-bottom:2px}
+.input-row{display:flex;gap:10px;margin-bottom:16px}
+.work-input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none}
+.work-input:focus{border-color:rgba(155,109,255,.5)}
+.btn-calc{background:var(--purple);color:#fff;border:none;padding:11px 20px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;white-space:nowrap}
+.btn-calc:hover{opacity:.85}
+#map-result{margin-top:0}
+#map{width:100%;height:260px;border-radius:12px;border:1px solid var(--border);margin-bottom:14px;display:none}
+.distance-info{display:none;background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:14px}
+.dist-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px}
+.dist-row:last-child{margin-bottom:0}
+.dist-label{color:var(--muted)}
+.dist-val{font-weight:500;color:var(--text)}
+.dist-val.good{color:var(--green)}
+.dist-val.ok{color:var(--gold)}
+.dist-val.far{color:var(--red)}
+.map-error{color:var(--red);font-size:13px;margin-top:8px;display:none}
+
+/* Empty / loading */
+.empty{text-align:center;padding:70px 20px;color:var(--muted);grid-column:1/-1}
+.empty-icon{font-size:44px;margin-bottom:14px}
+.empty-title{font-family:'Syne',sans-serif;font-size:18px;color:var(--text);margin-bottom:6px}
+.spinner-wrap{text-align:center;padding:70px;grid-column:1/-1}
+.spinner{width:30px;height:30px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:768px){
+  .header{padding:14px 16px} .stats{grid-template-columns:repeat(2,1fr)}
+  .filters{padding:14px 16px} .grid{padding:16px;grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="logo"><div class="logo-dot"></div>Promos Maroc</div>
+  <div class="logo"><div class="logo-pulse"></div>Promos Maroc</div>
   <div class="header-right">
-    <span class="last-update" id="lastUpdate">Chargement...</span>
-    <button class="refresh-btn" onclick="loadDeals()">↻ Actualiser</button>
+    <span class="update-badge" id="lastUpdate">—</span>
+    <button class="btn-refresh" onclick="loadDeals()">↻ Actualiser</button>
   </div>
 </header>
 
-<div class="stats-bar">
-  <div class="stat"><span class="stat-val" id="statTotal" style="color:var(--accent)">—</span><span class="stat-label">Deals actifs</span></div>
-  <div class="stat"><span class="stat-val" id="statAvgScore" style="color:var(--accent2)">—</span><span class="stat-label">Score moyen</span></div>
-  <div class="stat"><span class="stat-val" id="statAvgDiscount" style="color:var(--accent3)">—</span><span class="stat-label">Réduction moy.</span></div>
-  <div class="stat"><span class="stat-val" id="statTopDeal" style="color:var(--blue);font-size:16px">—</span><span class="stat-label">Meilleur deal</span></div>
+<div class="stats">
+  <div class="stat"><span class="stat-n" id="sTotal" style="color:var(--red)">—</span><span class="stat-l">Deals actifs</span></div>
+  <div class="stat"><span class="stat-n" id="sScore" style="color:var(--gold)">—</span><span class="stat-l">Score moyen</span></div>
+  <div class="stat"><span class="stat-n" id="sDiscount" style="color:var(--green)">—</span><span class="stat-l">Remise moyenne</span></div>
+  <div class="stat"><span class="stat-n" id="sTop" style="color:var(--blue);font-size:15px">—</span><span class="stat-l">Meilleur deal</span></div>
 </div>
 
-<main class="main">
-  <div class="filter-bar">
-    <span class="filter-label">Catégorie</span>
-    <button class="filter-btn active" onclick="setFilter('all',this)">Tous</button>
-    <button class="filter-btn" onclick="setFilter('Électronique & Tech',this)">📱 Tech</button>
-    <button class="filter-btn" onclick="setFilter('Maison & Déco',this)">🏠 Maison</button>
-    <button class="filter-btn" onclick="setFilter('Beauté & Santé',this)">✨ Beauté</button>
-    <button class="filter-btn" onclick="setFilter('Sport & Loisirs',this)">⚡ Sport</button>
-    <select class="sort-select" onchange="setSort(this.value)">
-      <option value="scraped_at">Plus récents</option>
-      <option value="score">Meilleur score</option>
-      <option value="discount_pct">Plus grosse remise</option>
-      <option value="price_asc">Prix croissant</option>
-    </select>
+<div class="filters">
+  <span class="fl">Catégorie</span>
+  <button class="f-btn on" onclick="filter('all',this)">Tout</button>
+  <button class="f-btn" onclick="filter('Électronique & Tech',this)">📱 Tech</button>
+  <button class="f-btn" onclick="filter('Maison & Déco',this)">🏠 Maison</button>
+  <button class="f-btn" onclick="filter('Beauté & Santé',this)">✨ Beauté</button>
+  <button class="f-btn" onclick="filter('Sport & Loisirs',this)">⚡ Sport</button>
+  <button class="f-btn" onclick="filter('Immobilier',this)">🏢 Immo</button>
+  <select class="sort" onchange="sortBy(this.value)">
+    <option value="date">Plus récents</option>
+    <option value="score">Meilleur score</option>
+    <option value="discount">Plus grosse remise</option>
+    <option value="price_asc">Prix croissant</option>
+  </select>
+</div>
+
+<div class="grid" id="grid">
+  <div class="spinner-wrap"><div class="spinner"></div><div>Chargement...</div></div>
+</div>
+
+<!-- Modal distance -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">📍 Calculer la distance</div>
+    <div class="modal-sub">Entrez l'adresse de votre lieu de travail</div>
+    <div class="modal-prop" id="modal-prop"></div>
+    <div class="input-row">
+      <input class="work-input" id="workAddr" placeholder="Ex: 123 Boulevard Hassan II, Casablanca" />
+      <button class="btn-calc" onclick="calcDistance()">Calculer</button>
+    </div>
+    <div id="map-result">
+      <div id="map"></div>
+      <div class="distance-info" id="distInfo">
+        <div class="dist-row"><span class="dist-label">🚗 En voiture</span><span class="dist-val" id="dCar">—</span></div>
+        <div class="dist-row"><span class="dist-label">🚶 À pied</span><span class="dist-val" id="dWalk">—</span></div>
+        <div class="dist-row"><span class="dist-label">🚌 Transport</span><span class="dist-val" id="dTransit">—</span></div>
+        <div class="dist-row"><span class="dist-label">📏 Distance</span><span class="dist-val" id="dDist">—</span></div>
+      </div>
+      <div class="map-error" id="mapError">Adresse introuvable. Essayez avec plus de détails.</div>
+    </div>
   </div>
-  <div class="deals-grid" id="dealsGrid">
-    <div class="loading"><div class="spinner"></div><div>Chargement des deals...</div></div>
-  </div>
-</main>
+</div>
 
 <script>
-const SUPABASE_URL = 'https://zhauqnqiesufhqdahdqg.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoYXVxbnFpZXN1ZmhxZGFoZHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTkwMjksImV4cCI6MjA5MDk3NTAyOX0.-QRurZPZa4NxiZpzZqe0C3otHQDh36TOuDcWYP6eSZg';
-let allDeals = [], currentFilter = 'all', currentSort = 'scraped_at';
+const SB_URL = 'https://zhauqnqiesufhqdahdqg.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoYXVxbnFpZXN1ZmhxZGFoZHFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTkwMjksImV4cCI6MjA5MDk3NTAyOX0.-QRurZPZa4NxiZpzZqe0C3otHQDh36TOuDcWYP6eSZg';
+const GM_KEY = 'AIzaSyAhsTBOd3m9aT5N-HYryAyyTSjXjrwkFYA';
+
+let all = [], cur = 'all', curSort = 'date', mapObj = null, curDeal = null;
 
 async function fetchDeals() {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/deals?select=*&order=scraped_at.desc&limit=200`, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  const r = await fetch(`${SB_URL}/rest/v1/deals?select=*&order=scraped_at.desc&limit=300`, {
+    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
   });
-  if (!res.ok) throw new Error(`Erreur ${res.status}`);
-  return await res.json();
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
 }
 
-function getCatClass(cat) {
-  if (!cat) return 'cat-tech';
-  if (cat.includes('Tech')) return 'cat-tech';
-  if (cat.includes('Maison')) return 'cat-maison';
-  if (cat.includes('Beauté')) return 'cat-beaute';
+function catClass(c) {
+  if (!c) return 'cat-tech';
+  if (c.includes('Tech')) return 'cat-tech';
+  if (c.includes('Maison')) return 'cat-maison';
+  if (c.includes('Beauté')) return 'cat-beaute';
+  if (c.includes('Immo')) return 'cat-immo';
   return 'cat-sport';
 }
-
-function getCatEmoji(cat) {
-  if (!cat) return '🏷️';
-  if (cat.includes('Tech')) return '📱';
-  if (cat.includes('Maison')) return '🏠';
-  if (cat.includes('Beauté')) return '✨';
+function catEmoji(c) {
+  if (!c) return '🏷️';
+  if (c.includes('Tech')) return '📱';
+  if (c.includes('Maison')) return '🏠';
+  if (c.includes('Beauté')) return '✨';
+  if (c.includes('Immo')) return '🏢';
   return '⚡';
 }
+function scoreColor(s) { return s>=7?'var(--green)':s>=5?'var(--gold)':'rgba(242,240,234,.2)'; }
+function scoreClass(s) { return s>=7?'s-high':s>=5?'s-mid':'s-low'; }
+function fmtPrice(p) { return p ? parseFloat(p).toLocaleString('fr-MA')+' MAD' : '?'; }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : ''; }
+function distClass(mins) { return mins<=20?'good':mins<=40?'ok':'far'; }
 
-function getScoreColor(s) {
-  return s >= 7 ? '#00E5A0' : s >= 5 ? '#FFB800' : 'rgba(240,238,232,0.2)';
-}
-
-function getScoreClass(s) {
-  return s >= 7 ? 'score-high' : s >= 5 ? 'score-mid' : 'score-low';
-}
-
-function fmtPrice(p) {
-  if (!p) return '?';
-  return parseFloat(p).toLocaleString('fr-MA') + ' MAD';
-}
-
-function fmtDate(d) {
-  if (!d) return '';
-  return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-}
-
-function renderImage(deal, index) {
-  if (deal.image_url) {
-    return `
-      <div class="card-image">
-        <img src="${deal.image_url}" 
-             alt="${deal.title}"
-             loading="lazy"
-             onerror="this.parentElement.innerHTML='<div class=\\'card-image-placeholder\\'><div class=\\'placeholder-icon\\'>${getCatEmoji(deal.category)}</div><div class=\\'placeholder-text\\'>Image indisponible</div></div>'"
-        />
-        ${deal.discount_pct > 0 ? `<div class="discount-overlay">-${deal.discount_pct}%</div>` : ''}
-      </div>`;
+function renderImgSection(d) {
+  const badge = d.is_real_estate
+    ? `<div class="badge-immo">🏢 Location</div>`
+    : (d.discount_pct>0 ? `<div class="badge-pct">-${d.discount_pct}%</div>` : '');
+  const hot = d.score>=8 ? `<div class="badge-hot">🔥 HOT</div>` : '';
+  if (d.image_url) {
+    return `<div class="card-img">${badge}${hot}<img src="${d.image_url}" alt="${d.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'img-ph\\'>${catEmoji(d.category)}</div>${badge}${hot}'"></div>`;
   }
-  return `
-    <div class="card-image">
-      <div class="card-image-placeholder">
-        <div class="placeholder-icon">${getCatEmoji(deal.category)}</div>
-        <div class="placeholder-text">Pas d'image</div>
-      </div>
-      ${deal.discount_pct > 0 ? `<div class="discount-overlay">-${deal.discount_pct}%</div>` : ''}
-    </div>`;
+  return `<div class="card-img"><div class="img-ph">${catEmoji(d.category)}</div>${badge}${hot}</div>`;
 }
 
-function renderCard(deal, i) {
-  const saving = deal.old_price && deal.price ? Math.round(deal.old_price - deal.price) : null;
-  return `
-    <div class="deal-card" style="animation-delay:${i*.04}s" onclick="${deal.url ? `window.open('${deal.url}','_blank')` : ''}">
-      ${renderImage(deal, i)}
-      <div class="card-header">
-        <span class="category-badge ${getCatClass(deal.category)}">${deal.category || 'Général'}</span>
+function renderCard(d, i) {
+  const isImmo = d.is_real_estate;
+  const saving = d.old_price && d.price ? Math.round(d.old_price - d.price) : null;
+
+  const priceSection = `
+    <div class="price-row">
+      <span class="price-now">${fmtPrice(d.price)}${isImmo ? '<span style="font-size:13px;font-weight:400">/mois</span>' : ''}</span>
+      ${d.old_price ? `<span class="price-was">${fmtPrice(d.old_price)}</span>` : ''}
+      ${saving&&saving>0 ? `<span class="price-save">-${saving.toLocaleString('fr-MA')} MAD</span>` : ''}
+    </div>`;
+
+  const immoMeta = isImmo ? `
+    <div class="immo-meta">
+      ${d.surface ? `<span class="immo-pill">📐 ${d.surface}m²</span>` : ''}
+      ${d.rooms ? `<span class="immo-pill">🛏 ${d.rooms} pièce${d.rooms>1?'s':''}</span>` : ''}
+      ${d.quartier ? `<span class="immo-pill">📍 ${d.quartier}</span>` : ''}
+      ${d.city ? `<span class="immo-pill">🏙 ${d.city}</span>` : ''}
+    </div>` : '';
+
+  const desc = d.description ? `<div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5">${d.description}</div>` : '';
+
+  const footer = `
+    <div class="card-foot">
+      <span class="card-date">${fmtDate(d.scraped_at)}</span>
+      <div style="display:flex;gap:6px">
+        ${isImmo ? `<button class="btn-map" onclick="event.stopPropagation();openModal(${JSON.stringify(d).replace(/"/g,'&quot;')})">📍 Distance</button>` : ''}
+        ${d.url ? `<a class="btn-deal" href="${d.url}" target="_blank" onclick="event.stopPropagation()">Voir →</a>` : ''}
       </div>
+    </div>`;
+
+  return `
+    <div class="card" style="animation-delay:${i*.04}s" onclick="${d.url&&!isImmo?`window.open('${d.url}','_blank')`:''}">
+      ${renderImgSection(d)}
       <div class="card-body">
-        <div class="deal-title">${deal.title}</div>
-        <div class="deal-enseigne">🏪 ${deal.enseigne || '—'}${deal.brand ? ' · ' + deal.brand : ''}</div>
-        <div class="price-row">
-          <span class="price-current">${fmtPrice(deal.price)}</span>
-          ${deal.old_price ? `<span class="price-old">${fmtPrice(deal.old_price)}</span>` : ''}
-          ${saving && saving > 0 ? `<span class="saving">-${saving.toLocaleString('fr-MA')} MAD</span>` : ''}
-        </div>
+        <span class="card-cat ${catClass(d.category)}">${catEmoji(d.category)} ${d.category||'Général'}</span>
+        <div class="card-title">${d.title}</div>
+        <div class="card-shop">🏪 ${d.enseigne||'—'}${d.brand?' · '+d.brand:''}</div>
+        ${priceSection}${immoMeta}${desc}
         <div class="score-row">
-          <div class="score-track">
-            <div class="score-fill" style="width:${deal.score*10}%;background:${getScoreColor(deal.score)}"></div>
-          </div>
-          <span class="score-text ${getScoreClass(deal.score)}">${deal.score}/10</span>
+          <div class="score-bar"><div class="score-fill" style="width:${d.score*10}%;background:${scoreColor(d.score)}"></div></div>
+          <span class="score-val ${scoreClass(d.score)}">${d.score}/10</span>
         </div>
-        <div class="card-footer">
-          <span class="deal-date">${fmtDate(deal.scraped_at)}</span>
-          ${deal.url ? `<a class="view-btn" href="${deal.url}" target="_blank" onclick="event.stopPropagation()">Voir →</a>` : ''}
-        </div>
+        ${footer}
       </div>
     </div>`;
 }
 
-function renderDeals() {
-  const grid = document.getElementById('dealsGrid');
-  let deals = [...allDeals];
-  if (currentFilter !== 'all') deals = deals.filter(d => d.category === currentFilter);
-  if (currentSort === 'score') deals.sort((a,b) => b.score - a.score);
-  else if (currentSort === 'discount_pct') deals.sort((a,b) => (b.discount_pct||0) - (a.discount_pct||0));
-  else if (currentSort === 'price_asc') deals.sort((a,b) => a.price - b.price);
-  else deals.sort((a,b) => new Date(b.scraped_at) - new Date(a.scraped_at));
+function render() {
+  const grid = document.getElementById('grid');
+  let deals = [...all];
+  if (cur !== 'all') deals = deals.filter(d => d.category === cur);
+  if (curSort === 'score') deals.sort((a,b) => b.score-a.score);
+  else if (curSort === 'discount') deals.sort((a,b) => (b.discount_pct||0)-(a.discount_pct||0));
+  else if (curSort === 'price_asc') deals.sort((a,b) => a.price-b.price);
+  else deals.sort((a,b) => new Date(b.scraped_at)-new Date(a.scraped_at));
+
   if (!deals.length) {
-    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Aucun deal</div><div>Le scraper tourne à 8h et 20h chaque jour</div></div>`;
+    grid.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">Aucun deal</div><div>Le scraper tourne à 8h et 20h chaque jour</div></div>`;
     return;
   }
   grid.innerHTML = deals.map((d,i) => renderCard(d,i)).join('');
 }
 
 function updateStats() {
-  document.getElementById('statTotal').textContent = allDeals.length;
-  const avg = allDeals.length ? (allDeals.reduce((s,d)=>s+(d.score||0),0)/allDeals.length).toFixed(1) : '—';
-  document.getElementById('statAvgScore').textContent = avg;
-  const wd = allDeals.filter(d=>d.discount_pct>0);
-  document.getElementById('statAvgDiscount').textContent = wd.length ? Math.round(wd.reduce((s,d)=>s+d.discount_pct,0)/wd.length)+'%' : '—';
-  const top = allDeals.reduce((a,b)=>(b.score>(a?.score||0)?b:a),null);
-  document.getElementById('statTopDeal').textContent = top ? top.title.slice(0,22)+(top.title.length>22?'…':'') : '—';
-  const latest = allDeals.reduce((a,b)=>new Date(b.scraped_at)>new Date(a?.scraped_at||0)?b:a,null);
-  document.getElementById('lastUpdate').textContent = latest ? 'Mis à jour ' + new Date(latest.scraped_at).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+  document.getElementById('sTotal').textContent = all.length;
+  const avg = all.length ? (all.reduce((s,d)=>s+(d.score||0),0)/all.length).toFixed(1) : '—';
+  document.getElementById('sScore').textContent = avg;
+  const wd = all.filter(d=>d.discount_pct>0);
+  document.getElementById('sDiscount').textContent = wd.length ? Math.round(wd.reduce((s,d)=>s+d.discount_pct,0)/wd.length)+'%' : '—';
+  const top = all.reduce((a,b)=>(b.score>(a?.score||0)?b:a),null);
+  document.getElementById('sTop').textContent = top ? top.title.slice(0,20)+(top.title.length>20?'…':'') : '—';
+  const latest = all.reduce((a,b)=>new Date(b.scraped_at)>new Date(a?.scraped_at||0)?b:a,null);
+  document.getElementById('lastUpdate').textContent = latest
+    ? 'Mis à jour '+new Date(latest.scraped_at).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+    : '—';
 }
 
 async function loadDeals() {
-  document.getElementById('dealsGrid').innerHTML = '<div class="loading"><div class="spinner"></div><div>Chargement...</div></div>';
+  document.getElementById('grid').innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><div>Chargement...</div></div>';
   try {
-    allDeals = await fetchDeals();
+    all = await fetchDeals();
     updateStats();
-    renderDeals();
+    render();
   } catch(e) {
-    document.getElementById('dealsGrid').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Erreur de connexion</div><div>${e.message}</div></div>`;
+    document.getElementById('grid').innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-title">Erreur</div><div>${e.message}</div></div>`;
   }
 }
 
-function setFilter(cat, btn) {
-  currentFilter = cat;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderDeals();
+function filter(cat, btn) {
+  cur = cat;
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  render();
 }
 
-function setSort(val) { currentSort = val; renderDeals(); }
+function sortBy(v) { curSort = v; render(); }
+
+// --- MODAL DISTANCE ---
+function openModal(deal) {
+  curDeal = deal;
+  document.getElementById('modal-prop').innerHTML = `<strong>${deal.title}</strong>${deal.address||deal.quartier ? '📍 '+(deal.address||deal.quartier+', '+(deal.city||'')) : ''}`;
+  document.getElementById('workAddr').value = '';
+  document.getElementById('distInfo').style.display = 'none';
+  document.getElementById('map').style.display = 'none';
+  document.getElementById('mapError').style.display = 'none';
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+function loadGoogleMaps() {
+  return new Promise((res) => {
+    if (window.google) { res(); return; }
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${GM_KEY}&libraries=places`;
+    s.onload = res;
+    document.head.appendChild(s);
+  });
+}
+
+async function calcDistance() {
+  const workAddr = document.getElementById('workAddr').value.trim();
+  if (!workAddr) return;
+
+  const btn = document.querySelector('.btn-calc');
+  btn.textContent = 'Calcul...';
+  btn.disabled = true;
+
+  document.getElementById('mapError').style.display = 'none';
+  document.getElementById('distInfo').style.display = 'none';
+
+  try {
+    await loadGoogleMaps();
+
+    const propAddr = curDeal.address
+      ? curDeal.address
+      : (curDeal.quartier ? `${curDeal.quartier}, ${curDeal.city||'Maroc'}` : curDeal.city||'Casablanca, Maroc');
+
+    // Afficher la carte
+    const mapEl = document.getElementById('map');
+    mapEl.style.display = 'block';
+
+    if (!mapObj) {
+      mapObj = new google.maps.Map(mapEl, {
+        zoom: 12,
+        center: { lat: 33.5731, lng: -7.5898 },
+        styles: [
+          { elementType: 'geometry', stylers: [{ color: '#1C1C2A' }] },
+          { elementType: 'labels.text.fill', stylers: [{ color: '#F2F0EA' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2A2A3E' }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0C0C18' }] },
+        ]
+      });
+    }
+
+    const geocoder = new google.maps.Geocoder();
+    const distService = new google.maps.DistanceMatrixService();
+
+    // Géocoder les deux adresses
+    const [propResult, workResult] = await Promise.all([
+      new Promise((res,rej) => geocoder.geocode({address: propAddr+', Maroc'}, (r,s) => s==='OK'?res(r[0]):rej())),
+      new Promise((res,rej) => geocoder.geocode({address: workAddr+', Maroc'}, (r,s) => s==='OK'?res(r[0]):rej()))
+    ]);
+
+    const propLoc = propResult.geometry.location;
+    const workLoc = workResult.geometry.location;
+
+    // Markers
+    new google.maps.Marker({ position: propLoc, map: mapObj, title: 'Logement', label: '🏠' });
+    new google.maps.Marker({ position: workLoc, map: mapObj, title: 'Travail', label: '💼' });
+
+    // Tracer un itinéraire
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(propLoc); bounds.extend(workLoc);
+    mapObj.fitBounds(bounds);
+
+    // Distance Matrix pour 3 modes
+    const modes = ['DRIVING', 'WALKING', 'TRANSIT'];
+    const results = await Promise.all(modes.map(mode =>
+      new Promise(res => distService.getDistanceMatrix({
+        origins: [propLoc], destinations: [workLoc], travelMode: mode
+      }, (r) => res(r)))
+    ));
+
+    const [car, walk, transit] = results.map(r => r?.rows?.[0]?.elements?.[0]);
+
+    const carMins = car?.duration?.value ? Math.round(car.duration.value/60) : null;
+    const walkMins = walk?.duration?.value ? Math.round(walk.duration.value/60) : null;
+    const transitMins = transit?.duration?.value ? Math.round(transit.duration.value/60) : null;
+    const distKm = car?.distance?.value ? (car.distance.value/1000).toFixed(1) : null;
+
+    document.getElementById('dCar').textContent = carMins ? `${carMins} min` : '—';
+    document.getElementById('dCar').className = 'dist-val '+(carMins?distClass(carMins):'');
+    document.getElementById('dWalk').textContent = walkMins ? `${walkMins} min` : '—';
+    document.getElementById('dWalk').className = 'dist-val '+(walkMins?distClass(walkMins):'');
+    document.getElementById('dTransit').textContent = transitMins ? `${transitMins} min` : '—';
+    document.getElementById('dTransit').className = 'dist-val '+(transitMins?distClass(transitMins):'');
+    document.getElementById('dDist').textContent = distKm ? `${distKm} km` : '—';
+
+    document.getElementById('distInfo').style.display = 'block';
+
+  } catch(e) {
+    document.getElementById('mapError').style.display = 'block';
+  }
+
+  btn.textContent = 'Calculer';
+  btn.disabled = false;
+}
+
+// Fermer modal en cliquant dehors
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
 
 loadDeals();
 setInterval(loadDeals, 5*60*1000);
